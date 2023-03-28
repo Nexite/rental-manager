@@ -1,3 +1,4 @@
+import { RentalUpdateParams } from "@/lib/rental";
 import { Rental } from "./rental";
 
 export enum SearchType {
@@ -10,7 +11,6 @@ export enum SortType {
   Address = "address",
   Revenue = "monthlyRevenue",
 }
-
 export class RentalManager {
   #rentals: Rental[];
   #listeners: ((rentals: Rental[]) => void)[] = [];
@@ -27,11 +27,13 @@ export class RentalManager {
       this.#listeners = this.#listeners.filter((l) => l !== fn);
     };
   };
+
   notify() {
     this.#listeners.forEach((l) => {
       l(this.#rentals);
     });
   }
+
   unmount() {
     this.#rentals = [];
     this.#listeners = [];
@@ -44,7 +46,10 @@ export class RentalManager {
   addRental(rental: Rental): void {
     // check if rental already exists
     for (const existingRental of this.#rentals) {
-      if (existingRental.name === rental.name && existingRental.address.toString() === rental.address.toString()) {
+      if (
+        existingRental.name === rental.name &&
+        existingRental.address.toString() === rental.address.toString()
+      ) {
         throw new Error("Rental with same name already exists");
       }
     }
@@ -87,6 +92,25 @@ export class RentalManager {
         : rental[searchType].includes(searchTerm);
     });
     return searchResults;
+  }
+
+  editRental(
+    searchTerm: string,
+    updates: RentalUpdateParams,
+    searchType: SearchType = SearchType.Name,
+  ): void {
+    // SearchType enum gives us property name, so we can use it to access the property of the rental class
+    const index = this.#rentals.findIndex((rental) => {
+      // SearchType enum gives us property name, so we can use it to access the property of the rental class
+      return searchType === SearchType.Address
+        ? rental.address.street.includes(searchTerm)
+        : rental[searchType].includes(searchTerm);
+    });
+    // SearchType enum gives us property name, so we can use it to access the property of the rental class
+    this.#rentals[index].edit(updates);
+    // SearchType enum gives us property name, so we can use it to access the property of the rental class
+    console.log("updated: ", this.#rentals[index]);
+    this.notify();
   }
 
   toJSON() {

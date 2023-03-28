@@ -1,5 +1,10 @@
 import { stateCodes } from "@/utils/misc";
-import { KeysMatching, NonFunctionPublicInterface, WritableProps } from "./../utils/types";
+import {
+  KeysMatching,
+  NonFunctionPublicInterface,
+  NonFunctionPublicInterfaceRecurse,
+  WritableProps,
+} from "./../utils/types";
 import { Tennant } from "./tennant";
 
 interface RentalCosts {
@@ -12,7 +17,8 @@ export type RentalPublicInterface = NonFunctionPublicInterface<Rental>;
 
 export type RentalConstParams = ConstructorParameters<typeof Rental>;
 
-export type RentalEditParams = WritableProps<NonFunctionPublicInterface<Rental>>;
+export type RentalUpdateParams = WritableProps<NonFunctionPublicInterface<Rental>>;
+export type RentalObjectInterface = WritableProps<NonFunctionPublicInterfaceRecurse<Rental>>;
 
 interface AddressProps {
   street: string;
@@ -46,7 +52,6 @@ export class Address {
   }
 
   set zip(newZip: string) {
-    console.log(newZip)
     if (newZip.length > 5 || !/^\d+$/.test(newZip)) {
       throw new Error("Invalid zip code");
     }
@@ -58,7 +63,7 @@ export class Address {
   }
 
   toString(): string {
-    return `${this.street}, ${this.city}, ${this.state} ${this.zip}`;
+    return `${this.street},\n${this.city}, ${this.state} ${this.zip}`;
   }
 
   toJSON() {
@@ -147,19 +152,15 @@ export class Rental {
     return this.rentPerMonth - this.totalMonthlyCost;
   }
 
-  edit(edits: Partial<RentalEditParams>) {
-    Object.keys(edits).forEach((key) => {
-      const _value = edits[key as keyof RentalEditParams];
-      switch (typeof _value) {
-        case "string":
-          this[key as KeysMatching<RentalEditParams, string>] = _value;
-          break;
-        case "number":
-          this[key as KeysMatching<RentalEditParams, number>] = _value;
-          break;
-      }
-    });
-    this.emit();
+  edit(edits: Partial<RentalUpdateParams>) {
+    if (edits.address) {
+      console.log(edits.address);
+      Object.assign(this.address, edits.address);
+      delete edits.address;
+      console.log(this.address);
+    }
+    Object.assign(this, edits);
+    console.log(this);
   }
 
   toJSON() {
@@ -176,14 +177,20 @@ export class Rental {
   }
 
   static fromJSON(jsonRental: RentalConstParams) {
-    // console.log(jsonRental[1]);
-    // jsonRental[1] = new Address(
-    //   jsonRental[1].street,
-    //   jsonRental[1].city,
-    //   jsonRental[1].state,
-    //   jsonRental[1].zip,
-    // );
     return new Rental(...jsonRental);
+  }
+
+  toObject(): RentalObjectInterface {
+    return {
+      name: this.name,
+      address: this.address.toJSON(),
+      rentPerMonth: this.rentPerMonth,
+      tennantName: this.tennantName,
+      tennantPhoneNumber: this.tennantPhoneNumber,
+      moragagePerMonth: this.moragagePerMonth,
+      maintencePerMonth: this.maintencePerMonth,
+      miscPerMonth: this.miscPerMonth,
+    };
   }
 
   toString(): string {

@@ -1,8 +1,6 @@
 import {
   ChangeEvent,
-  ChangeEventHandler,
   Dispatch,
-  FormEvent,
   PropsWithChildren,
   useEffect,
   useReducer,
@@ -25,14 +23,15 @@ import {
   Divider,
   Select,
   FormErrorMessage,
-  FormHelperText,
 } from "@chakra-ui/react";
-import { Address, Rental, RentalEditParams } from "@/lib/rental";
+import {
+  Rental,
+  RentalObjectInterface,
+  RentalUpdateParams,
+} from "@/lib/rental";
 import { mergeDeep, stateCodes } from "@/utils/misc";
 import {
-  KeysMatching,
   NonFunctionPublicInterfaceRecurse,
-  PublicInterfaceRecurse,
   WritableProps,
   RecursivePartial,
 } from "@/utils/types";
@@ -42,8 +41,8 @@ type RentalModalProps = PropsWithChildren<{
   onOpen: () => void;
   onClose: () => void;
   edit?: boolean;
-  rental: Rental;
-  // updateRental: (rental: Rental) => void;
+  rental?: Rental;
+  onUpdate?: (rental: Rental) => void;
 }>;
 
 // type atestAddressUpdates = NonFunctionPublicInterfaceRecurse<string>;
@@ -53,43 +52,31 @@ export const AddRentalModal = ({
   onOpen,
   onClose,
   edit,
+  onUpdate = () => {},
   rental: initialRental,
 }: // children,
 RentalModalProps) => {
   // React cannot read property updates on class objects so when we update the rental object we need to force a re-render
   const [rentalStateUpdate, updateState] = useState<any>();
   const [rental, updateRental] = useReducer(
-    (prev: Rental, updates: RecursivePartial<RentalModalUpdates> | Rental) => {
-      const _address = Object.fromEntries(
-        ["_street", "_city", "_state", "_zip"]
-          .filter((key) => key in updates) // line can be removed to make it inclusive
-          .map((key) => {
-            const _update = updates[key as keyof typeof updates];
-            delete updates[key as keyof typeof updates];
-            return [key.replace(/^./, ""), _update];
-          }),
-      );
-      if (Object.keys(_address).length > 0) updates.address = _address;
-      if (updates.address) {
-        Object.assign(prev.address, updates.address);
-        delete updates.address;
-      }
-      mergeDeep(prev, updates);
-      updateState({});
-      return prev;
+    (prev: RentalObjectInterface, updates: RecursivePartial<RentalObjectInterface>) => {
+      const temp = mergeDeep({}, prev, updates);
+      // console.log(temp);
+      return temp;
     },
-    initialRental.clone(),
+    { ...(initialRental?.toObject() || { address: {}} as RentalObjectInterface) },
   );
+  // console.log("Rental: ", rental);
 
   useEffect(() => {
-    console.log(rental);
+    // console.log(rental);
   }, [rentalStateUpdate]);
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={() => {
-        updateRental(initialRental.clone());
+        updateRental({ ...(initialRental?.toObject() || { address: {}} as RentalObjectInterface) });
         onClose();
       }}
       size={"xl"}
@@ -102,7 +89,18 @@ RentalModalProps) => {
           <FormHouseInfo rental={rental} updateRental={updateRental} />
         </ModalBody>
         <ModalFooter>
-          <Button colorScheme={"green"}>{edit ? "Save" : "Add"}</Button>
+          <Button
+            colorScheme={"green"}
+            onClick={() => {
+              // console.log("UpdateRental: ", rental);
+              onUpdate(rental);
+              updateRental({ ...(initialRental?.toObject() || { address: {}} as RentalObjectInterface) });
+              onClose();
+              // onUpdate(Rental.fromObject(rental));
+            }}
+          >
+            {edit ? "Save" : "Add"}
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
@@ -113,10 +111,18 @@ function FormHouseInfo({
   rental,
   updateRental,
 }: {
-  rental: Rental;
+  rental: RentalUpdateParams;
   updateRental: Dispatch<Rental | RecursivePartial<RentalModalUpdates>>;
 }) {
   function update(e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+    if (e.target.id.startsWith("_")) {
+      updateRental({
+        address: {
+          [e.target.id.replace(/^./, "")]: e.target.value,
+        },
+      });
+      return;
+    }
     updateRental({
       [e.target.id]: e.target.value,
     });
@@ -127,39 +133,22 @@ function FormHouseInfo({
       <Divider mb={"3"} mt={"3"} />
       <FormControl>
         <FormLabel>House Name</FormLabel>
-        <Input
-          id={"name"}
-          value={rental.name}
-          onChange={update}
-        />
+        <Input id={"name"} value={rental.name} onChange={update} />
       </FormControl>
 
       <FormControl>
         <FormLabel paddingTop={"2"}>Street</FormLabel>
-        <Input
-          id={"_street"}
-          value={rental.address.street}
-          onChange={update}
-        />
+        <Input id={"_street"} value={rental.address.street} onChange={update} />
       </FormControl>
 
       <FormControl>
         <FormLabel paddingTop={"2"}>City</FormLabel>
-        <Input
-          id={"_city"}
-          value={rental.address.city}
-          onChange={update}
-        />
+        <Input id={"_city"} value={rental.address.city} onChange={update} />
       </FormControl>
 
       <FormControl>
         <FormLabel paddingTop={"2"}>State</FormLabel>
-        <Select
-          id={"_state"}
-          placeholder=""
-          value={rental.address.state}
-          onChange={update}
-        >
+        <Select id={"_state"} placeholder="" value={rental.address.state} onChange={update}>
           {stateCodes.map((state) => (
             <option key={state} value={state}>
               {state}
@@ -168,7 +157,7 @@ function FormHouseInfo({
         </Select>
       </FormControl>
 
-      <FormControl isInvalid={rental.address.zip.length !== 5}>
+      <FormControl isInvalid={rental.address.zip?.length !== 5 && !!rental.address?.zip}>
         <FormLabel paddingTop={"2"}>Zip Code</FormLabel>
         <Input
           value={rental.address.zip}
@@ -176,8 +165,7 @@ function FormHouseInfo({
           maxLength={5}
           onChange={(e) => {
             const newZip = e.target.value;
-            if (newZip.length <= 5 && /^\d+$/.test(newZip))
-              update(e);
+            if (newZip.length === 0 || (newZip.length <= 5 && /^\d+$/.test(newZip))) update(e);
           }}
         />
         <FormErrorMessage>Invalid Zip Code</FormErrorMessage>

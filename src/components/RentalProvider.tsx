@@ -1,5 +1,5 @@
 import { LocalStorageManager } from "@/lib/local-storage-manager";
-import { Rental } from "@/lib/rental";
+import { Rental, RentalUpdateParams } from "@/lib/rental";
 import { SearchType, RentalManager, SortType } from "@/lib/rental-manager";
 import { useRentals } from "@/lib/useRentals";
 import { useToast } from "@chakra-ui/react";
@@ -12,15 +12,25 @@ export const RentalContext = createContext<
     (nameOrAddress: string, searchType: SearchType) => void | undefined,
     (nameOrAddress: string, searchType?: SearchType | undefined) => Rental[] | undefined,
     (sortType?: SortType | undefined) => void | undefined,
+    (
+      nameOrAddress: string,
+      updates: RentalUpdateParams,
+      searchType?: SearchType,
+    ) => void | undefined,
   ]
 >([
   [],
-  function (rental: Rental): void | undefined {},
-  function (nameOrAddress: string, searchType: SearchType): void | undefined {},
-  function (nameOrAddress: string, searchType?: SearchType | undefined): Rental[] {
+  function (_rental: Rental): void | undefined {},
+  function (_nameOrAddress: string, _searchType: SearchType): void | undefined {},
+  function (_nameOrAddress: string, _searchType?: SearchType | undefined): Rental[] {
     return [];
   },
-  function (sortType?: SortType | undefined): void | undefined {},
+  function (_sortType?: SortType | undefined): void | undefined {},
+  function (
+    _nameOrAddress: string,
+    _updates: RentalUpdateParams,
+    _searchType?: SearchType,
+  ): void | undefined {},
 ]);
 
 function useErrorToast<T extends any[], R>(fn: (...x: T) => R) {
@@ -29,6 +39,7 @@ function useErrorToast<T extends any[], R>(fn: (...x: T) => R) {
     try {
       return fn(...x);
     } catch (error: any) {
+      console.error(error);
       toast({
         title: "Error",
         description: error.message,
@@ -62,7 +73,7 @@ export default function RentalProvider({ children }: PropsWithChildren<{}>) {
   }, []);
 
   useEffect(() => {
-    console.log("rentals changed: ", rentals);
+    // console.log("rentals changed: ", rentals);
     if (hasDataLoaded) {
       localStorageManager.write(rentals);
     }
@@ -95,8 +106,18 @@ export default function RentalProvider({ children }: PropsWithChildren<{}>) {
     ),
   );
 
+  const editRental = useErrorToast(
+    useCallback(
+      (searchTerm: string, updates: RentalUpdateParams, sortType: SearchType = SearchType.Name) =>
+        rentalManager.editRental(searchTerm, updates, sortType),
+      [rentalManager],
+    ),
+  );
+
   return (
-    <RentalContext.Provider value={[rentals, addRental, deleteRental, searchRental, sortRentals]}>
+    <RentalContext.Provider
+      value={[rentals, addRental, deleteRental, searchRental, sortRentals, editRental]}
+    >
       {children}
     </RentalContext.Provider>
   );

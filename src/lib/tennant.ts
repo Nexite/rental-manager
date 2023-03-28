@@ -1,10 +1,10 @@
 export class Tennant {
   // define variables as private with # prefix so we can use getters and setters for validation
-  #name: string;
-  #phoneNumber: string;
+  #name: string = "";
+  #phoneNumber: string = "";
 
   constructor(name: string, phoneNumber: string) {
-    this.#name = name;
+    this.name = name;
     this.#phoneNumber = phoneNumber;
   }
 
@@ -14,11 +14,11 @@ export class Tennant {
 
   set name(newName: string) {
     // regex to validate newName only contains letters, spaces, apostrophes and dashes
-    const nameValidator = /^[\\p{L} .'-]+$/;
+    const nameValidator = /^[a-z ,.'-]+$/i;
     if (nameValidator.test(newName) === false) {
       throw new Error("Name can only contain letters, spaces, apostrophes and dashes");
     } else {
-      this.name = newName;
+      this.#name = newName;
     }
   }
 
@@ -33,7 +33,7 @@ export class Tennant {
         "Phone number can only contain numbers, dashes, parentheses, spaces, and plus signs",
       );
     }
-    this.phoneNumber = newNumber;
+    this.#phoneNumber = newNumber;
   }
 
   // method to return a string of the Tennant's name and phone number, will be used for debugging
