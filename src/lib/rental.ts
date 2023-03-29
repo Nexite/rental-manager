@@ -80,6 +80,8 @@ export class Address {
   }
 }
 
+// Rental class
+
 export class Rental {
   public name: string;
   public address: Address;
@@ -106,10 +108,15 @@ export class Rental {
     this.#tennant = new Tennant(tennantName, tennantPhoneNumber);
     this.#rentalCosts = { moragagePerMonth, maintencePerMonth, miscPerMonth } as RentalCosts;
   }
+  
   // custom getters so you don't need to access tennant property directly
+
+  // Returns the name of the tenant
   get tennantName(): string {
     return this.#tennant.name;
   }
+
+   // Returns the tennant phone number for the current tennant.
   get tennantPhoneNumber(): string {
     return this.#tennant.phoneNumber;
   }
@@ -131,20 +138,20 @@ export class Rental {
     this.#rentalCosts.miscPerMonth = newCost;
   }
   get moragagePerMonth(): number {
-    return this.#rentalCosts.moragagePerMonth;
+    return parseInt(this.#rentalCosts.moragagePerMonth as unknown as string);
   }
   get maintencePerMonth(): number {
-    return this.#rentalCosts.maintencePerMonth;
+    return parseInt(this.#rentalCosts.maintencePerMonth as unknown as string);
   }
   get miscPerMonth(): number {
-    return this.#rentalCosts.miscPerMonth;
+    return parseInt(this.#rentalCosts.miscPerMonth as unknown as string);
   }
 
   get totalMonthlyCost(): number {
     return (
-      this.#rentalCosts.moragagePerMonth +
-      this.#rentalCosts.maintencePerMonth +
-      this.#rentalCosts.miscPerMonth
+      this.moragagePerMonth +
+      this.maintencePerMonth +
+      this.miscPerMonth
     );
   }
 
@@ -191,6 +198,18 @@ export class Rental {
       maintencePerMonth: this.maintencePerMonth,
       miscPerMonth: this.miscPerMonth,
     };
+  }
+  static fromObject(object: RentalObjectInterface): Rental {
+    return new Rental(
+      object.name,
+      object.address,
+      object.tennantName,
+      object.tennantPhoneNumber,
+      object.rentPerMonth,
+      object.moragagePerMonth,
+      object.maintencePerMonth,
+      object.miscPerMonth,
+    );
   }
 
   toString(): string {

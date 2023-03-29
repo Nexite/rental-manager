@@ -33,13 +33,12 @@ export const RentalContext = createContext<
   ): void | undefined {},
 ]);
 
-function useErrorToast<T extends any[], R>(fn: (...x: T) => R) {
+export function useErrorToast<T extends any[], R>(fn: (...x: T) => R) {
   const toast = useToast();
   return (...x: T) => {
     try {
       return fn(...x);
     } catch (error: any) {
-      console.error(error);
       toast({
         title: "Error",
         description: error.message,
@@ -73,7 +72,6 @@ export default function RentalProvider({ children }: PropsWithChildren<{}>) {
   }, []);
 
   useEffect(() => {
-    // console.log("rentals changed: ", rentals);
     if (hasDataLoaded) {
       localStorageManager.write(rentals);
     }

@@ -1,5 +1,5 @@
 import { AddRentalModal } from "@/components/AddRentalModal";
-import { RentalContext } from "@/components/RentalProvider";
+import { RentalContext, useErrorToast } from "@/components/RentalProvider";
 import { RentalTableItem } from "@/components/RentalTableItem";
 import { Address, Rental } from "@/lib/rental";
 import { SearchType, SortType } from "@/lib/rental-manager";
@@ -19,6 +19,7 @@ import {
   Button,
   useColorModeValue,
   useDisclosure,
+  Center,
 } from "@chakra-ui/react";
 import { useContext, useEffect } from "react";
 let i = 1;
@@ -30,7 +31,15 @@ export default function Home() {
 
   return (
     <>
-      <AddRentalModal isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
+      <AddRentalModal
+        isOpen={isOpen}
+        onOpen={onOpen}
+        onClose={onClose}
+        onUpdate={useErrorToast((object) => {
+          const newRental = Rental.fromObject(object);
+          addRental(newRental);
+        })}
+      />
       <Card marginTop={"4rem"}>
         <CardHeader>
           <Heading size="md">All Rentals</Heading>
@@ -86,6 +95,15 @@ export default function Home() {
           </TableContainer>
         </CardBody>
       </Card>
+
+      <Center>
+        <Heading pt="10" size="lg">
+          Total Monthly Profit:{" "}
+          {rentals
+            .map((rental) => rental.monthlyRevenue)
+            .reduce((partialTotal, a) => partialTotal + a, 0)}
+        </Heading>
+      </Center>
     </>
   );
 }
