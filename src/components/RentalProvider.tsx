@@ -33,12 +33,18 @@ export const RentalContext = createContext<
   ): void | undefined {},
 ]);
 
+// useErrorToast is a custom hook that wraps a function and catches any errors that are thrown
+// and displays them as a toast
 export function useErrorToast<T extends any[], R>(fn: (...x: T) => R) {
+  // useToast is a Chakra UI hook that displays a toast
   const toast = useToast();
+  // callback function that wraps the function and catches any errors that are thrown
   return (...x: T) => {
     try {
       return fn(...x);
     } catch (error: any) {
+      console.error(error);
+      // display the error as a toast
       toast({
         title: "Error",
         description: error.message,
@@ -51,9 +57,11 @@ export function useErrorToast<T extends any[], R>(fn: (...x: T) => R) {
 }
 
 export default function RentalProvider({ children }: PropsWithChildren<{}>) {
+  // useMemo is used to ensure that the rentalManager is only created once and doesn't get duplicated on a re-render
   const rentalManager = useMemo(() => new RentalManager(), []);
   const localStorageManager = new LocalStorageManager();
 
+  // useRentals is a custom hook that returns the rentals and adds an event listener to update the rentals when they change
   const [rentals] = useRentals(rentalManager);
   const [hasDataLoaded, setHasDataLoaded] = useState(false);
 
@@ -61,7 +69,11 @@ export default function RentalProvider({ children }: PropsWithChildren<{}>) {
     if (!hasDataLoaded && typeof window !== "undefined") {
       const loadedRentals = localStorageManager.load();
       loadedRentals.forEach((rental) => {
-        rentalManager.addRental(rental);
+        try {
+          rentalManager.addRental(rental);
+        } catch (error) {
+          console.error(error);
+        }
       });
       setHasDataLoaded(true);
     }
@@ -82,6 +94,8 @@ export default function RentalProvider({ children }: PropsWithChildren<{}>) {
   );
 
   const deleteRental = useErrorToast(
+    // useCallback is used to ensure that the function is only created once
+    // and doesn't get duplicated on a re-render
     useCallback(
       (nameOrAddress: string, searchType: SearchType) =>
         rentalManager.deleteRental(nameOrAddress, searchType),

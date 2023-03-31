@@ -52,7 +52,8 @@ export class Address {
   }
 
   set zip(newZip: string) {
-    if (newZip.length > 5 || !/^\d+$/.test(newZip)) {
+    // validate zip code is 5 digits and that it only contains numbers
+    if (newZip.length != 5 || !/^\d+$/.test(newZip)) {
       throw new Error("Invalid zip code");
     }
     this.#zip = newZip;
@@ -108,7 +109,7 @@ export class Rental {
     this.#tennant = new Tennant(tennantName, tennantPhoneNumber);
     this.#rentalCosts = { moragagePerMonth, maintencePerMonth, miscPerMonth } as RentalCosts;
   }
-  
+
   // custom getters so you don't need to access tennant property directly
 
   // Returns the name of the tenant
@@ -116,7 +117,7 @@ export class Rental {
     return this.#tennant.name;
   }
 
-   // Returns the tennant phone number for the current tennant.
+  // Returns the tennant phone number for the current tennant.
   get tennantPhoneNumber(): string {
     return this.#tennant.phoneNumber;
   }
@@ -148,11 +149,7 @@ export class Rental {
   }
 
   get totalMonthlyCost(): number {
-    return (
-      this.moragagePerMonth +
-      this.maintencePerMonth +
-      this.miscPerMonth
-    );
+    return this.moragagePerMonth + this.maintencePerMonth + this.miscPerMonth;
   }
 
   get monthlyRevenue(): number {

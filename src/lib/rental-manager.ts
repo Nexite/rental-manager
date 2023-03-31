@@ -83,7 +83,7 @@ export class RentalManager {
     }
     this.notify();
   }
-
+  // searchType is name by default name
   searchRental(searchTerm: string, searchType: SearchType = SearchType.Name): Rental[] {
     // SearchType enum gives us property name, so we can use it to access the property of the rental class
     const searchResults = this.#rentals.filter((rental) => {
@@ -113,6 +113,7 @@ export class RentalManager {
     this.notify();
   }
 
+  // default javascript function, will be automatically called when JSON.stringify is called on this class
   toJSON() {
     return this.#rentals.map((rental) => rental.toJSON());
   }
