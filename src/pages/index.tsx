@@ -1,8 +1,7 @@
 import { AddRentalModal } from "@/components/AddRentalModal";
 import { RentalContext, useErrorToast } from "@/components/RentalProvider";
 import { RentalTableItem } from "@/components/RentalTableItem";
-import { Address, Rental } from "@/lib/rental";
-import { SearchType, SortType } from "@/lib/rental-manager";
+import { Rental } from "@/lib/rental";
 import {
   Card,
   CardHeader,
@@ -21,7 +20,7 @@ import {
   useDisclosure,
   Center,
 } from "@chakra-ui/react";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 let i = 1;
 export default function Home() {
   const [rentals, addRental, deleteRental, searchRental, sortRentals] = useContext(RentalContext);

@@ -1,7 +1,7 @@
 import { Rental } from "@/lib/rental";
-import { SearchType, SortType } from "@/lib/rental-manager";
-import { border, Button, Td, Tr, useColorModeValue, useDisclosure } from "@chakra-ui/react";
-import { PropsWithChildren, useContext } from "react";
+import { SearchType } from "@/lib/rental-manager";
+import { Button, Td, Tr, useColorModeValue, useDisclosure } from "@chakra-ui/react";
+import { useContext } from "react";
 import { AddRentalModal } from "./AddRentalModal";
 import { RentalContext } from "./RentalProvider";
 

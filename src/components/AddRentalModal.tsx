@@ -78,32 +78,37 @@ RentalModalProps) => {
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>{edit ? "View/Edit" : "Add"} Rental</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <FormHouseInfo rental={rental} updateRental={updateRental} />
-          <Divider mb={"3"} mt={"3"} />
-          <FormTennantInfo rental={rental} updateRental={updateRental} />
-          <Divider mb={"3"} mt={"3"} />
-          <FormFinanceInfo rental={rental} updateRental={updateRental} />
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            colorScheme={"green"}
-            onClick={() => {
-              // updateRental({ address: {} } as RentalObjectInterface);
-              onUpdate(rental);
-              updateRental({
-                ...(initialRental?.toObject() ||
-                  ({ address: {}, reset: true } as RecursivePartial<RentalObjectInterface> & {
-                    reset?: Boolean;
-                  })),
-              });
-              onClose();
-            }}
-          >
-            {edit ? "Save" : "Add"}
-          </Button>
-        </ModalFooter>
+        <form
+          onSubmit={() => {
+            // updateRental({ address: {} } as RentalObjectInterface);
+            onUpdate(rental);
+            updateRental({
+              ...(initialRental?.toObject() ||
+                ({ address: {}, reset: true } as RecursivePartial<RentalObjectInterface> & {
+                  reset?: Boolean;
+                })),
+            });
+            onClose();
+          }}
+        >
+          <ModalCloseButton />
+          <ModalBody>
+            <FormHouseInfo rental={rental} updateRental={updateRental} />
+            <Divider mb={"3"} mt={"3"} />
+            <FormTennantInfo rental={rental} updateRental={updateRental} />
+            <Divider mb={"3"} mt={"3"} />
+            <FormFinanceInfo rental={rental} updateRental={updateRental} />
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              colorScheme={"green"}
+              type={"submit"}
+              // onClick={}
+            >
+              {edit ? "Save" : "Add"}
+            </Button>
+          </ModalFooter>
+        </form>
       </ModalContent>
     </Modal>
   );
@@ -134,25 +139,25 @@ function FormHouseInfo({
     <>
       <Heading size="md">House Info</Heading>
       <Divider mb={"3"} mt={"3"} />
-      <FormControl isInvalid={!!!rental.name}>
+      <FormControl isInvalid={!!!rental.name} isRequired>
         <FormLabel>House Name</FormLabel>
         <Input id={"name"} value={rental.name} onChange={update} />
         <FormErrorMessage>Please enter a name</FormErrorMessage>
       </FormControl>
 
-      <FormControl isInvalid={!!!rental.address.street}>
+      <FormControl isInvalid={!!!rental.address.street} isRequired>
         <FormLabel paddingTop={"2"}>Street</FormLabel>
         <Input id={"_street"} value={rental.address.street} onChange={update} />
         <FormErrorMessage>Please enter a street</FormErrorMessage>
       </FormControl>
 
-      <FormControl isInvalid={!!!rental.address.city}>
+      <FormControl isInvalid={!!!rental.address.city} isRequired>
         <FormLabel paddingTop={"2"}>City</FormLabel>
         <Input id={"_city"} value={rental.address.city} onChange={update} />
         <FormErrorMessage>Please enter a city</FormErrorMessage>
       </FormControl>
 
-      <FormControl isInvalid={!stateCodes.includes(rental.address.state)}>
+      <FormControl isInvalid={!stateCodes.includes(rental.address.state)} isRequired>
         <FormLabel paddingTop={"2"}>State</FormLabel>
         <Select id={"_state"} placeholder="" value={rental.address.state} onChange={update}>
           <option />
@@ -166,6 +171,7 @@ function FormHouseInfo({
       </FormControl>
 
       <FormControl
+        isRequired
         isInvalid={
           !rental.address.zip || (rental.address.zip?.length !== 5 && !!rental.address?.zip)
         }
@@ -211,13 +217,13 @@ function FormTennantInfo({
     <>
       <Heading size="md">Tennant Info</Heading>
       <Divider mb={"3"} mt={"3"} />
-      <FormControl isInvalid={!!!rental.tennantName}>
+      <FormControl isInvalid={!!!rental.tennantName} isRequired>
         <FormLabel>Tennant Name</FormLabel>
         <Input id={"tennantName"} value={rental.tennantName} onChange={update} />
         <FormErrorMessage>Please enter a tennant name</FormErrorMessage>
       </FormControl>
 
-      <FormControl isInvalid={!!!rental.tennantPhoneNumber}>
+      <FormControl isInvalid={!!!rental.tennantPhoneNumber} isRequired>
         <FormLabel paddingTop={"2"}>Phone Number</FormLabel>
         <Input id={"tennantPhoneNumber"} value={rental.tennantPhoneNumber} onChange={update} />
         <FormErrorMessage>Please enter a phone number</FormErrorMessage>
@@ -251,7 +257,7 @@ function FormFinanceInfo({
     <>
       <Heading size="md">Finance Info</Heading>
       <Divider mb={"3"} mt={"3"} />
-      <FormControl>
+      <FormControl isRequired>
         <FormLabel>Rent Per Month</FormLabel>
         <Input
           id={"rentPerMonth"}
