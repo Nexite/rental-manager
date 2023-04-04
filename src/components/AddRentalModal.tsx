@@ -79,6 +79,7 @@ RentalModalProps) => {
       <ModalContent>
         <ModalHeader>{edit ? "View/Edit" : "Add"} Rental</ModalHeader>
         <form
+          autoComplete="off"
           onSubmit={() => {
             // updateRental({ address: {} } as RentalObjectInterface);
             onUpdate(rental);
