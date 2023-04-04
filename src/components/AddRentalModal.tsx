@@ -21,6 +21,7 @@ import { Rental, RentalObjectInterface, RentalUpdateParams } from "@/lib/rental"
 import { mergeDeep, stateCodes } from "@/utils/misc";
 import { NonFunctionPublicInterfaceRecurse, WritableProps, RecursivePartial } from "@/utils/types";
 
+// define props for rental modal
 type RentalModalProps = PropsWithChildren<{
   isOpen: boolean;
   onOpen: () => void;
@@ -29,8 +30,9 @@ type RentalModalProps = PropsWithChildren<{
   rental?: Rental;
   onUpdate?: (rental: Rental) => void;
 }>;
-
 type RentalModalUpdates = WritableProps<NonFunctionPublicInterfaceRecurse<Rental>>;
+
+// define the modal
 export const AddRentalModal = ({
   isOpen,
   onOpen,
@@ -107,6 +109,7 @@ RentalModalProps) => {
   );
 };
 
+// define the house info part of the modal
 function FormHouseInfo({
   rental,
   updateRental,
@@ -183,6 +186,7 @@ function FormHouseInfo({
   );
 }
 
+// define the tennant info part of the modal
 function FormTennantInfo({
   rental,
   updateRental,
@@ -222,6 +226,7 @@ function FormTennantInfo({
   );
 }
 
+// define the finance info part of the modal
 function FormFinanceInfo({
   rental,
   updateRental,

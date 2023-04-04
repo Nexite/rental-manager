@@ -95,7 +95,6 @@ export default function Home() {
           </TableContainer>
         </CardBody>
       </Card>
-
       <Center>
         <Heading pt="10" size="lg">
           Total Monthly Profit:{" "}

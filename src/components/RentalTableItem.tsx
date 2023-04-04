@@ -5,6 +5,8 @@ import { PropsWithChildren, useContext } from "react";
 import { AddRentalModal } from "./AddRentalModal";
 import { RentalContext } from "./RentalProvider";
 
+
+// function for each rental item in the table
 export function RentalTableItem({ rental }: { rental: Rental }) {
   const borderColor = useColorModeValue("gray.700", "whiteAlpha.300");
   const [rentals, addRental, deleteRental, searchRental, sortRentals, updateRental] =
